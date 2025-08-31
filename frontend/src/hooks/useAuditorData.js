@@ -27,23 +27,38 @@ export const useAuditorData = () => {
         creditService.getCreditStats()
       ]);
 
-      // Process results
-      const newData = {};
+      // Process results with fallback arrays
+      const newData = {
+        allCredits: [],
+        allTransactions: [],
+        allListings: [],
+        stats: {},
+        fraudAlerts: [],
+        analytics: {}
+      };
 
-      if (creditsRes.status === 'fulfilled') {
-        newData.allCredits = creditsRes.value.data || [];
+      if (creditsRes.status === 'fulfilled' && creditsRes.value?.data) {
+        newData.allCredits = Array.isArray(creditsRes.value.data) ? creditsRes.value.data : [];
+      } else {
+        console.warn('Credits API failed or returned invalid data:', creditsRes);
       }
 
-      if (transactionsRes.status === 'fulfilled') {
-        newData.allTransactions = transactionsRes.value.data || [];
+      if (transactionsRes.status === 'fulfilled' && transactionsRes.value?.data) {
+        newData.allTransactions = Array.isArray(transactionsRes.value.data) ? transactionsRes.value.data : [];
+      } else {
+        console.warn('Transactions API failed or returned invalid data:', transactionsRes);
       }
 
-      if (marketplaceRes.status === 'fulfilled') {
-        newData.allListings = marketplaceRes.value.data || [];
+      if (marketplaceRes.status === 'fulfilled' && marketplaceRes.value?.data) {
+        newData.allListings = Array.isArray(marketplaceRes.value.data) ? marketplaceRes.value.data : [];
+      } else {
+        console.warn('Marketplace API failed or returned invalid data:', marketplaceRes);
       }
 
-      if (statsRes.status === 'fulfilled') {
+      if (statsRes.status === 'fulfilled' && statsRes.value?.data) {
         newData.stats = statsRes.value.data || {};
+      } else {
+        console.warn('Stats API failed or returned invalid data:', statsRes);
       }
 
       // Generate fraud alerts based on data analysis
@@ -88,6 +103,12 @@ export const useAuditorData = () => {
   const checkVolumePatterns = (credits) => {
     const alerts = [];
     const producerVolumes = {};
+
+    // Safety check: ensure credits is an array
+    if (!Array.isArray(credits)) {
+      console.warn('checkVolumePatterns: credits is not an array:', credits);
+      return alerts;
+    }
 
     credits.forEach(credit => {
       const producerId = credit.producerId;
@@ -136,6 +157,13 @@ export const useAuditorData = () => {
   // Check for duplicate certificates
   const checkDuplicateCertificates = (credits) => {
     const alerts = [];
+    
+    // Safety check: ensure credits is an array
+    if (!Array.isArray(credits)) {
+      console.warn('checkDuplicateCertificates: credits is not an array:', credits);
+      return alerts;
+    }
+    
     const certificateGroups = {};
 
     credits.forEach(credit => {
@@ -175,6 +203,13 @@ export const useAuditorData = () => {
   // Check for unusual transaction patterns
   const checkTransactionPatterns = (transactions) => {
     const alerts = [];
+    
+    // Safety check: ensure transactions is an array
+    if (!Array.isArray(transactions)) {
+      console.warn('checkTransactionPatterns: transactions is not an array:', transactions);
+      return alerts;
+    }
+    
     const userTransactions = {};
 
     transactions.forEach(transaction => {
@@ -217,6 +252,13 @@ export const useAuditorData = () => {
   // Check for price manipulation
   const checkPriceManipulation = (listings) => {
     const alerts = [];
+    
+    // Safety check: ensure listings is an array
+    if (!Array.isArray(listings)) {
+      console.warn('checkPriceManipulation: listings is not an array:', listings);
+      return alerts;
+    }
+    
     const priceStats = {};
 
     listings.forEach(listing => {
@@ -359,6 +401,12 @@ export const useAuditorData = () => {
 
   // Helper function to get monthly data
   const getMonthlyData = (items, dateField) => {
+    // Safety check: ensure items is an array
+    if (!Array.isArray(items)) {
+      console.warn('getMonthlyData: items is not an array:', items);
+      return [];
+    }
+    
     const months = {};
     const currentDate = new Date();
     
@@ -383,6 +431,12 @@ export const useAuditorData = () => {
 
   // Helper function to get status distribution
   const getStatusDistribution = (items) => {
+    // Safety check: ensure items is an array
+    if (!Array.isArray(items)) {
+      console.warn('getStatusDistribution: items is not an array:', items);
+      return [];
+    }
+    
     const distribution = {};
     items.forEach(item => {
       distribution[item.status] = (distribution[item.status] || 0) + 1;

@@ -31,10 +31,12 @@ const setTokenCookie = (res, token) => {
 export const register = async (req, res) => {
   try {
     const {
-      name,
+      firstName,
+      lastName,
       email,
       password,
-      role
+      role,
+      organization
     } = req.body;
 
     // Check if user already exists
@@ -47,10 +49,12 @@ export const register = async (req, res) => {
 
     // Create new user
     const userData = {
-      name,
+      firstName,
+      lastName,
       email,
       password,
-      role: role || 'producer'
+      role: role || 'producer',
+      organization
     };
 
     const user = new User(userData);
@@ -164,6 +168,19 @@ export const login = async (req, res) => {
       });
     }
 
+    // Auto-migrate user if they have old schema (name field but no firstName/lastName)
+    if (user.name && (!user.firstName || !user.lastName)) {
+      const nameParts = user.name.trim().split(' ');
+      user.firstName = nameParts[0] || 'User';
+      user.lastName = nameParts.slice(1).join(' ') || 'Account';
+    }
+    
+    // Set default names if none exist
+    if (!user.firstName && !user.lastName) {
+      user.firstName = 'User';
+      user.lastName = 'Account';
+    }
+    
     // Update last login
     user.lastLogin = new Date();
     await user.save();

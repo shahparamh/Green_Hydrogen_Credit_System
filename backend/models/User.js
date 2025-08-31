@@ -2,10 +2,23 @@ import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 
 const userSchema = new mongoose.Schema({
-  // Basic Information
+  // Basic Information - Support both old and new formats
+  firstName: {
+    type: String,
+    required: false, // Made optional to support migration
+    trim: true,
+    maxlength: [50, 'First name cannot exceed 50 characters']
+  },
+  lastName: {
+    type: String,
+    required: false, // Made optional to support migration
+    trim: true,
+    maxlength: [50, 'Last name cannot exceed 50 characters']
+  },
+  // Legacy field for backward compatibility
   name: {
     type: String,
-    required: [true, 'Name is required'],
+    required: false,
     trim: true,
     maxlength: [100, 'Name cannot exceed 100 characters']
   },
@@ -25,8 +38,13 @@ const userSchema = new mongoose.Schema({
   role: {
     type: String,
     required: [true, 'Role is required'],
-    enum: ['producer', 'certifier', 'buyer', 'auditor', 'admin'],
+    enum: ['producer', 'certifier', 'buyer', 'auditor', 'regulator'],
     default: 'producer'
+  },
+  organization: {
+    type: String,
+    trim: true,
+    maxlength: [200, 'Organization name cannot exceed 200 characters']
   },
   
   // Profile Information
@@ -88,13 +106,46 @@ const userSchema = new mongoose.Schema({
   toObject: { virtuals: true }
 });
 
-// Virtual for full name
+// Pre-save middleware to handle migration from old 'name' field
+userSchema.pre('save', function(next) {
+  // If this is an existing user with 'name' but no 'firstName'/'lastName'
+  if (this.name && !this.firstName && !this.lastName) {
+    const nameParts = this.name.trim().split(' ');
+    this.firstName = nameParts[0] || 'User';
+    this.lastName = nameParts.slice(1).join(' ') || 'Account';
+  }
+  
+  // If this is a new user without firstName/lastName, set defaults
+  if (!this.firstName && !this.lastName) {
+    this.firstName = 'User';
+    this.lastName = 'Account';
+  }
+  
+  next();
+});
+
+// Pre-find middleware to ensure virtuals work for old users
+userSchema.pre('find', function() {
+  this.select('+name'); // Include the legacy name field
+});
+
+userSchema.pre('findOne', function() {
+  this.select('+name'); // Include the legacy name field
+});
+
+// Virtual for full name (prioritizes new format, falls back to old)
 userSchema.virtual('fullName').get(function() {
-  return this.name;
+  if (this.firstName && this.lastName) {
+    return `${this.firstName} ${this.lastName}`.trim();
+  }
+  return this.name || 'User Account';
 });
 
 // Virtual for display name
 userSchema.virtual('displayName').get(function() {
+  if (this.firstName && this.lastName) {
+    return `${this.firstName} ${this.lastName}`.trim();
+  }
   return this.name || this.email.split('@')[0];
 });
 
@@ -139,7 +190,7 @@ userSchema.methods.changedPasswordAfter = function(JWTTimestamp) {
 
 // Static method to find user by email
 userSchema.statics.findByEmail = function(email) {
-  return this.findOne({ email: email.toLowerCase() });
+  return this.findOne({ email: email.toLowerCase() }).select('+name');
 };
 
 // Static method to find active users by role

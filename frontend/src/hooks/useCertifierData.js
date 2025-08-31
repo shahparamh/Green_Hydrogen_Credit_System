@@ -60,31 +60,36 @@ export const useCertifierData = () => {
   const calculateAnalytics = (rawData) => {
     const { pendingRequests, approvedCredits, transactions } = rawData;
 
+    // Safety checks: ensure all data is arrays
+    const safePendingRequests = Array.isArray(pendingRequests) ? pendingRequests : [];
+    const safeApprovedCredits = Array.isArray(approvedCredits) ? approvedCredits : [];
+    const safeTransactions = Array.isArray(transactions) ? transactions : [];
+
     // Request analytics
     const requestAnalytics = {
-      totalPending: pendingRequests.length,
-      totalApproved: approvedCredits.length,
-      approvalRate: approvedCredits.length > 0 ? 
-        (approvedCredits.length / (pendingRequests.length + approvedCredits.length)) * 100 : 0,
-      monthlyRequests: getMonthlyData([...pendingRequests, ...approvedCredits], 'createdAt'),
-      statusDistribution: getStatusDistribution([...pendingRequests, ...approvedCredits])
+      totalPending: safePendingRequests.length,
+      totalApproved: safeApprovedCredits.length,
+      approvalRate: safeApprovedCredits.length > 0 ? 
+        (safeApprovedCredits.length / (safePendingRequests.length + safeApprovedCredits.length)) * 100 : 0,
+      monthlyRequests: getMonthlyData([...safePendingRequests, ...safeApprovedCredits], 'createdAt'),
+      statusDistribution: getStatusDistribution([...safePendingRequests, ...safeApprovedCredits])
     };
 
     // Transaction analytics
     const transactionAnalytics = {
-      totalTransactions: transactions.length,
-      completedTransactions: transactions.filter(t => t.status === 'completed').length,
-      pendingTransactions: transactions.filter(t => t.status === 'pending').length,
-      totalVolume: transactions.reduce((sum, t) => sum + (t.amount || 0), 0),
-      monthlyTransactions: getMonthlyData(transactions, 'createdAt')
+      totalTransactions: safeTransactions.length,
+      completedTransactions: safeTransactions.filter(t => t.status === 'completed').length,
+      pendingTransactions: safeTransactions.filter(t => t.status === 'pending').length,
+      totalVolume: safeTransactions.reduce((sum, t) => sum + (t.amount || 0), 0),
+      monthlyTransactions: getMonthlyData(safeTransactions, 'createdAt')
     };
 
     return {
       requests: requestAnalytics,
       transactions: transactionAnalytics,
       overview: {
-        totalProcessed: pendingRequests.length + approvedCredits.length,
-        averageProcessingTime: calculateAverageProcessingTime(pendingRequests, approvedCredits),
+        totalProcessed: safePendingRequests.length + safeApprovedCredits.length,
+        averageProcessingTime: calculateAverageProcessingTime(safePendingRequests, safeApprovedCredits),
         performanceScore: calculatePerformanceScore(requestAnalytics, transactionAnalytics)
       }
     };
@@ -92,6 +97,12 @@ export const useCertifierData = () => {
 
   // Helper function to get monthly data
   const getMonthlyData = (items, dateField) => {
+    // Safety check: ensure items is an array
+    if (!Array.isArray(items)) {
+      console.warn('getMonthlyData: items is not an array:', items);
+      return [];
+    }
+    
     const months = {};
     const currentDate = new Date();
     
@@ -116,6 +127,12 @@ export const useCertifierData = () => {
 
   // Helper function to get status distribution
   const getStatusDistribution = (items) => {
+    // Safety check: ensure items is an array
+    if (!Array.isArray(items)) {
+      console.warn('getStatusDistribution: items is not an array:', items);
+      return [];
+    }
+    
     const distribution = {};
     items.forEach(item => {
       distribution[item.status] = (distribution[item.status] || 0) + 1;

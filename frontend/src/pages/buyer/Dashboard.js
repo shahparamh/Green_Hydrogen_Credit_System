@@ -20,6 +20,7 @@ import LineChart from '../../components/Charts/LineChart';
 import BarChart from '../../components/Charts/BarChart';
 import PieChart from '../../components/Charts/PieChart';
 import { useBuyerData } from '../../hooks/useBuyerData';
+import { transactionService } from '../../services';
 
 const BuyerDashboard = () => {
   const { data, loading, error, refreshAll, purchaseCredits, retireCredits } = useBuyerData();

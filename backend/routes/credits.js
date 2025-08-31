@@ -11,37 +11,41 @@ import {
   getCreditsByStatus,
   retireCredits
 } from '../controllers/creditController.js';
+import { authenticateUser } from '../middleware/userMiddleware.js';
 
 const router = express.Router();
 
 // Get all credits
-router.get('/', getAllCredits);
+router.get('/', authenticateUser, getAllCredits);
 
 // Get credit statistics
-router.get('/stats', getCreditStats);
+router.get('/stats', authenticateUser, getCreditStats);
 
 // Get credits for current authenticated user
-router.get('/user', getCreditsByCurrentUser);
+router.get('/user', authenticateUser, getCreditsByCurrentUser);
 
 // Get credits by status
-router.get('/status/:status', getCreditsByStatus);
+router.get('/status/:status', authenticateUser, getCreditsByStatus);
 
 // Get credits by user ID
-router.get('/user/:userId', getCreditsByUser);
+router.get('/user/:userId', authenticateUser, getCreditsByUser);
 
 // Create credit request
-router.post('/request', createCreditRequest);
+router.post('/request', authenticateUser, createCreditRequest);
+
+// Create credit request (alias)
+router.post('/', authenticateUser, createCreditRequest);
 
 // Retire credits
-router.post('/retire', retireCredits);
+router.post('/retire', authenticateUser, retireCredits);
 
 // Update credit status
-router.put('/:id/status', updateCreditStatus);
+router.put('/:id/status', authenticateUser, updateCreditStatus);
 
 // Transfer credits
-router.post('/:id/transfer', transferCredits);
+router.post('/:id/transfer', authenticateUser, transferCredits);
 
 // Get credit by ID
-router.get('/:id', getCreditById);
+router.get('/:id', authenticateUser, getCreditById);
 
 export default router;

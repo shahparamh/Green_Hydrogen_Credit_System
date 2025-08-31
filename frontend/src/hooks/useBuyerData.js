@@ -60,35 +60,40 @@ export const useBuyerData = () => {
   const calculateAnalytics = (rawData) => {
     const { purchasedCredits, transactions, marketplaceListings } = rawData;
 
+    // Safety checks: ensure all data is arrays
+    const safePurchasedCredits = Array.isArray(purchasedCredits) ? purchasedCredits : [];
+    const safeTransactions = Array.isArray(transactions) ? transactions : [];
+    const safeMarketplaceListings = Array.isArray(marketplaceListings) ? marketplaceListings : [];
+
     // Credit analytics
     const creditAnalytics = {
-      totalCredits: purchasedCredits.length,
-      activeCredits: purchasedCredits.filter(c => c.status === 'active').length,
-      expiredCredits: purchasedCredits.filter(c => c.status === 'expired').length,
-      totalValue: purchasedCredits.reduce((sum, c) => sum + (c.value || 0), 0),
-      monthlyPurchases: getMonthlyData(purchasedCredits, 'createdAt'),
-      statusDistribution: getStatusDistribution(purchasedCredits)
+      totalCredits: safePurchasedCredits.length,
+      activeCredits: safePurchasedCredits.filter(c => c.status === 'active').length,
+      expiredCredits: safePurchasedCredits.filter(c => c.status === 'expired').length,
+      totalValue: safePurchasedCredits.reduce((sum, c) => sum + (c.value || 0), 0),
+      monthlyPurchases: getMonthlyData(safePurchasedCredits, 'createdAt'),
+      statusDistribution: getStatusDistribution(safePurchasedCredits)
     };
 
     // Transaction analytics
     const transactionAnalytics = {
-      totalTransactions: transactions.length,
-      completedTransactions: transactions.filter(t => t.status === 'completed').length,
-      pendingTransactions: transactions.filter(t => t.status === 'pending').length,
-      totalVolume: transactions.reduce((sum, t) => sum + (t.amount || 0), 0),
-      monthlyTransactions: getMonthlyData(transactions, 'createdAt'),
-      transactionTypes: getTransactionTypeDistribution(transactions)
+      totalTransactions: safeTransactions.length,
+      completedTransactions: safeTransactions.filter(t => t.status === 'completed').length,
+      pendingTransactions: safeTransactions.filter(t => t.status === 'pending').length,
+      totalVolume: safeTransactions.reduce((sum, t) => sum + (t.amount || 0), 0),
+      monthlyTransactions: getMonthlyData(safeTransactions, 'createdAt'),
+      transactionTypes: getTransactionTypeDistribution(safeTransactions)
     };
 
     // Marketplace analytics
     const marketplaceAnalytics = {
-      totalListings: marketplaceListings.length,
-      activeListings: marketplaceListings.filter(l => l.status === 'active').length,
-      soldListings: marketplaceListings.filter(l => l.status === 'sold').length,
-      totalRevenue: marketplaceListings
+      totalListings: safeMarketplaceListings.length,
+      activeListings: safeMarketplaceListings.filter(l => l.status === 'active').length,
+      soldListings: safeMarketplaceListings.filter(l => l.status === 'sold').length,
+      totalRevenue: safeMarketplaceListings
         .filter(l => l.status === 'sold')
         .reduce((sum, l) => sum + (l.price || 0), 0),
-      monthlyListings: getMonthlyData(marketplaceListings, 'createdAt')
+      monthlyListings: getMonthlyData(safeMarketplaceListings, 'createdAt')
     };
 
     return {
@@ -97,7 +102,7 @@ export const useBuyerData = () => {
       marketplace: marketplaceAnalytics,
       overview: {
         totalPortfolioValue: creditAnalytics.totalValue + marketplaceAnalytics.totalRevenue,
-        monthlyGrowth: calculateMonthlyGrowth(purchasedCredits, transactions),
+        monthlyGrowth: calculateMonthlyGrowth(safePurchasedCredits, safeTransactions),
         performanceScore: calculatePerformanceScore(creditAnalytics, transactionAnalytics)
       }
     };
@@ -105,6 +110,12 @@ export const useBuyerData = () => {
 
   // Helper function to get monthly data
   const getMonthlyData = (items, dateField) => {
+    // Safety check: ensure items is an array
+    if (!Array.isArray(items)) {
+      console.warn('getMonthlyData: items is not an array:', items);
+      return [];
+    }
+    
     const months = {};
     const currentDate = new Date();
     
@@ -129,6 +140,12 @@ export const useBuyerData = () => {
 
   // Helper function to get status distribution
   const getStatusDistribution = (items) => {
+    // Safety check: ensure items is an array
+    if (!Array.isArray(items)) {
+      console.warn('getStatusDistribution: items is not an array:', items);
+      return [];
+    }
+    
     const distribution = {};
     items.forEach(item => {
       distribution[item.status] = (distribution[item.status] || 0) + 1;
@@ -138,6 +155,12 @@ export const useBuyerData = () => {
 
   // Helper function to get transaction type distribution
   const getTransactionTypeDistribution = (transactions) => {
+    // Safety check: ensure transactions is an array
+    if (!Array.isArray(transactions)) {
+      console.warn('getTransactionTypeDistribution: transactions is not an array:', transactions);
+      return [];
+    }
+    
     const distribution = {};
     transactions.forEach(transaction => {
       distribution[transaction.type] = (distribution[transaction.type] || 0) + 1;
@@ -147,6 +170,12 @@ export const useBuyerData = () => {
 
   // Helper function to calculate monthly growth
   const calculateMonthlyGrowth = (credits, transactions) => {
+    // Safety check: ensure credits is an array
+    if (!Array.isArray(credits)) {
+      console.warn('calculateMonthlyGrowth: credits is not an array:', credits);
+      return 0;
+    }
+    
     const currentMonth = new Date().getMonth();
     const currentYear = new Date().getFullYear();
     

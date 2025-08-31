@@ -1,262 +1,291 @@
-<<<<<<< HEAD
-# Green_Hydrogen_Credit_System
-=======
-# 🌱 GreenH2 - Blockchain-Based Green Hydrogen Credit System
+# 🌱 Green Hydrogen Credit System
 
-A comprehensive blockchain-based platform for tracking, issuing, transferring, and retiring credits for certified green hydrogen production. The system ensures transparency, immutability, and traceability of each credit through blockchain technology.
+> **Blockchain-Based Green Hydrogen Credit System** - A decentralized platform for minting, trading, and retiring verified green hydrogen credits with full transparency and audit trails.
 
-## 🚀 Features
+## ✅ **LATEST UPDATE: User Migration Issue FIXED**
 
-### 🔐 Authentication & Authorization
-- **JWT-based authentication** with HTTP-only cookies
-- **Role-based access control** for all stakeholders
-- **Secure password hashing** with bcrypt
-- **Session management** with refresh tokens
+**The system has been updated to handle user migration automatically. Existing users can now login without any issues.**
 
-### 👥 Multi-Stakeholder Platform
-- **Producers**: Request and manage green hydrogen credits
-- **Certifiers**: Verify and approve credit issuance requests
-- **Buyers**: Purchase and retire credits from marketplace
-- **Auditors**: Monitor all transactions and detect fraud
+- ✅ **Auto-migration**: Old users automatically get `firstName`/`lastName` fields
+- ✅ **Backward compatibility**: Supports both old and new user formats  
+- ✅ **Seamless experience**: No data loss or manual intervention required
+- ✅ **Ready to use**: System is fully functional and production-ready
 
-### 📊 Analytics & Dashboards
-- **Real-time analytics** for all stakeholders
-- **Interactive charts** and data visualization
-- **Performance metrics** and trend analysis
-- **Customizable dashboards** per user role
+**Quick Start**: Run `start-fixed-project.bat` (Windows) or `./start-fixed-project.sh` (Mac/Linux)
 
-### 🌙 Dark/Light Mode
-- **Persistent theme preference** (survives page refresh)
-- **System theme detection** with manual override
-- **Smooth transitions** between themes
-- **Consistent theming** across all components
+## 🎯 Project Overview
 
-### 🔗 Blockchain Integration
-- **Smart contract integration** for credit management
-- **Immutable transaction history** on blockchain
-- **Credit uniqueness verification** preventing double counting
-- **Transparent audit trail** for all operations
+The Green Hydrogen Credit System is a comprehensive blockchain solution that enables the creation, verification, trading, and retirement of green hydrogen credits. This system addresses the critical need for transparent and verifiable carbon offset mechanisms in the hydrogen economy.
 
-## 🛠️ Technology Stack
+### 🌟 Key Features
 
-### Frontend
-- **React 19** with modern hooks and patterns
-- **TailwindCSS** for utility-first styling
-- **Recharts** for data visualization
-- **React Router** for navigation
-- **Axios** for API communication
-- **Lucide React** for beautiful icons
+- **🔐 Role-Based Access Control**: Secure role management for producers, certifiers, buyers, auditors, and regulators
+- **📜 Certificate Management**: Unique, non-fungible certificates for each hydrogen production batch
+- **🔄 Decentralized Trading**: Peer-to-peer marketplace for credit trading
+- **✅ Verification System**: Multi-layered verification process with oracle support
+- **📊 Full Audit Trail**: Complete transparency with blockchain-based logging
+- **🛡️ Security First**: Built with OpenZeppelin contracts and best practices
+- **🌐 IPFS Integration**: Decentralized storage for certificate metadata
 
-### Backend
-- **Node.js** with Express.js framework
-- **MongoDB** with Mongoose ODM
-- **JWT** for secure authentication
-- **bcrypt** for password hashing
-- **Helmet** for security headers
-- **Rate limiting** and CORS protection
-
-### Blockchain
-- **Solidity** smart contracts
-- **Hardhat** development environment
-- **Ethers.js** for blockchain interaction
-- **OpenZeppelin** for secure contract patterns
-
-## 📁 Project Structure
+## 🏗️ System Architecture
 
 ```
-project/
-├── frontend/                 # React frontend application
-│   ├── src/
-│   │   ├── components/      # Reusable UI components
-│   │   ├── contexts/        # React contexts (Theme, Auth)
-│   │   ├── pages/           # Page components
-│   │   ├── hooks/           # Custom React hooks
-│   │   └── utils/           # Utility functions
-│   ├── public/              # Static assets
-│   └── package.json         # Frontend dependencies
-├── backend/                  # Node.js backend API
-│   ├── routes/              # API route handlers
-│   ├── middleware/          # Express middleware
-│   ├── models/              # MongoDB models
-│   ├── config/              # Configuration files
-│   └── package.json         # Backend dependencies
-├── contracts/                # Solidity smart contracts
-├── scripts/                  # Deployment and utility scripts
-└── README.md                # This file
+┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
+│   Frontend      │    │    Backend       │    │   Blockchain    │
+│   (React)       │◄──►│   (Node.js)      │◄──►│   (Ethereum)    │
+└─────────────────┘    └──────────────────┘    └─────────────────┘
+         │                       │                       │
+         │                       │                       │
+         ▼                       ▼                       ▼
+┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
+│   IPFS Storage  │    │   MongoDB        │    │   Smart        │
+│   (Metadata)    │    │   (Events)       │    │   Contracts    │
+└─────────────────┘    └──────────────────┘    └─────────────────┘
 ```
+
+## 📋 Smart Contracts
+
+### 1. **HydrogenCredits.sol**
+- ERC20 token representing green hydrogen credits
+- Role-based access control for all operations
+- Certificate tracking with unique identifiers
+- Pausable functionality for emergency situations
+
+### 2. **TradeMarketplace.sol**
+- Decentralized marketplace for credit trading
+- Support for both buy and sell orders
+- Escrow functionality for secure transactions
+- Platform fee management
+
+### 3. **Verification.sol**
+- Verification system for hydrogen production
+- Oracle integration for automated verification
+- Request management with timeout handling
+- Multi-verifier support
 
 ## 🚀 Quick Start
 
 ### Prerequisites
-- **Node.js** 18+ and **npm** 9+
-- **MongoDB** (local or Atlas)
-- **MetaMask** or similar Web3 wallet
-- **Git**
 
-### 1. Clone the Repository
+- Node.js 18+ and npm
+- Hardhat development environment
+- MongoDB (for backend)
+- MetaMask or similar wallet
+- IPFS node (optional, for metadata storage)
+
+### 1. Clone and Install
+
 ```bash
 git clone <repository-url>
-cd greenh2-project
+cd Green_Hydrogen_Credit_System
+npm install
+cd frontend && npm install
+cd ../backend && npm install
 ```
 
-### 2. Install Dependencies
-```bash
-# Install frontend dependencies
-cd frontend
-npm install
-
-# Install backend dependencies
-cd ../backend
-npm install
-
-# Install root dependencies (for blockchain)
-cd ..
-npm install
-```
-
-### 3. Environment Configuration
-
-#### Frontend (.env)
-```bash
-cd frontend
-cp env.example .env
-# Edit .env with your configuration
-```
+### 2. Environment Setup
 
 #### Backend (.env)
 ```bash
 cd backend
 cp env.example .env
-# Edit .env with your configuration
 ```
 
-### 4. Database Setup
-```bash
-# Start MongoDB (if local)
-mongod
-
-# Or use MongoDB Atlas connection string in backend/.env
+Edit `.env` with your configuration:
+```env
+PORT=4000
+MONGODB_URI=mongodb://localhost:27017/green_hydrogen
+JWT_SECRET=your-super-secret-jwt-key-here-change-this-in-production
+COOKIE_SECRET=your-cookie-secret-key-here-change-this-in-production
+NODE_ENV=development
+RATE_LIMIT_WINDOW_MS=900000
+RATE_LIMIT_MAX_REQUESTS=100
 ```
 
-### 5. Blockchain Setup
+#### Frontend (.env)
 ```bash
-# Compile smart contracts
-npx hardhat compile
+cd frontend
+cp env.example .env
+```
 
-# Deploy to local network
+Edit `.env`:
+```env
+REACT_APP_API_URL=http://localhost:4000/api
+REACT_APP_CHAIN_ID=1337
+REACT_APP_RPC_URL=http://localhost:8545
+```
+
+### 3. Deploy Smart Contracts
+
+```bash
+# Start local blockchain
 npx hardhat node
+
+# In new terminal, deploy contracts
 npx hardhat run scripts/deploy.js --network localhost
 ```
 
-### 6. Start Development Servers
+### 4. Start Backend
+
 ```bash
-# Terminal 1: Backend
 cd backend
 npm run dev
+```
 
-# Terminal 2: Frontend
+### 5. Start Frontend
+
+```bash
 cd frontend
 npm start
 ```
 
-## 🌐 Access Points
+## 🔄 Complete Workflow Example
 
-- **Frontend**: http://localhost:3000
-- **Backend API**: http://localhost:4000/api
-- **Hardhat Node**: http://localhost:8545
+### Producer → Certifier → Buyer → Auditor Flow
 
-## 🔧 Configuration
+#### 1. **Producer Requests Verification**
+```javascript
+// Producer submits verification request
+const requestId = await verification.requestVerification(
+  1000, // 1000 credits
+  "QmMetadataHash123", // IPFS hash
+  "Solar Farm Alpha, California",
+  "Solar Electrolysis",
+  50 // gCO2/kWh
+);
+```
 
-### Environment Variables
+#### 2. **Certifier Approves Production**
+```javascript
+// Certifier completes verification
+await verification.completeVerification(
+  requestId,
+  true, // approved
+  "Production verified - meets green hydrogen standards"
+);
+// Credits are automatically minted to producer
+```
 
-#### Frontend
-- `REACT_APP_API_URL`: Backend API URL
-- `REACT_APP_BLOCKCHAIN_NETWORK`: Blockchain network name
-- `REACT_APP_CONTRACT_ADDRESSES`: JSON string of contract addresses
+#### 3. **Producer Lists Credits for Sale**
+```javascript
+// Producer creates marketplace listing
+const orderId = await marketplace.placeSellOrder(
+  500, // 500 credits
+  ethers.utils.parseEther("0.01"), // 0.01 ETH per credit
+  "High-quality solar hydrogen credits",
+  [1, 2] // certificate IDs
+);
+```
 
-#### Backend
-- `MONGODB_URI`: MongoDB connection string
-- `JWT_SECRET`: Secret key for JWT tokens
-- `COOKIE_SECRET`: Secret key for cookie signing
-- `PORT`: Server port (default: 4000)
+#### 4. **Buyer Purchases Credits**
+```javascript
+// Buyer fills the order
+await marketplace.fillSellOrder(orderId, {
+  value: ethers.utils.parseEther("5") // 500 * 0.01 ETH
+});
+// Credits transferred to buyer, ETH to producer
+```
 
-### Smart Contract Configuration
-- Update contract addresses in `frontend/src/contract-addresses.json`
-- Configure network settings in `hardhat.config.js`
+#### 5. **Buyer Retires Credits**
+```javascript
+// Buyer retires credits for carbon offset
+await hydrogenCredits.retireCredits(
+  200, // 200 credits
+  [3, 4], // certificate IDs
+  "Corporate sustainability initiative"
+);
+// Credits burned, certificate marked as retired
+```
 
-## 📊 Dashboard Features
-
-### Producer Dashboard
-- **Credit Request Management**: Submit and track credit requests
-- **Production Analytics**: Monitor hydrogen production metrics
-- **Credit Balance**: View issued and pending credits
-- **Performance Trends**: Historical data visualization
-
-### Certifier Dashboard
-- **Request Review**: Approve or reject credit requests
-- **Verification Tools**: Document and evidence review
-- **Approval Analytics**: Track certification metrics
-- **Quality Assurance**: Maintain certification standards
-
-### Buyer Dashboard
-- **Marketplace**: Browse and purchase available credits
-- **Portfolio Management**: Track owned credits
-- **Retirement Tools**: Retire credits for sustainability goals
-- **Transaction History**: Complete audit trail
-
-### Auditor Dashboard
-- **System Monitoring**: Real-time transaction monitoring
-- **Fraud Detection**: Automated anomaly detection
-- **Compliance Reports**: Regulatory compliance verification
-- **System Analytics**: Platform-wide performance metrics
-
-## 🔒 Security Features
-
-- **JWT Authentication** with secure cookie storage
-- **Role-based Access Control** (RBAC)
-- **Rate Limiting** to prevent abuse
-- **Input Validation** and sanitization
-- **CORS Protection** for cross-origin requests
-- **Helmet Security Headers**
-- **Password Hashing** with bcrypt
+#### 6. **Auditor Reviews System**
+```javascript
+// Auditor can view all transactions and certificates
+const certificates = await hydrogenCredits.getCertificate(1);
+const transactions = await marketplace.getOrder(1);
+// Full audit trail available on blockchain
+```
 
 ## 🧪 Testing
 
+### Run Smart Contract Tests
 ```bash
-# Frontend tests
-cd frontend
-npm test
-
-# Backend tests
-cd backend
-npm test
-
-# Smart contract tests
 npx hardhat test
 ```
 
-## 📦 Deployment
-
-### Frontend Build
-```bash
-cd frontend
-npm run build
-```
-
-### Backend Production
+### Run Backend Tests
 ```bash
 cd backend
-NODE_ENV=production npm start
+npm test
 ```
 
-### Smart Contract Deployment
+### Run Frontend Tests
 ```bash
-# Deploy to testnet
-npx hardhat run scripts/deploy.js --network sepolia
-
-# Deploy to mainnet
-npx hardhat run scripts/deploy.js --network mainnet
+cd frontend
+npm test
 ```
+
+## 🔒 Security Features
+
+- **OpenZeppelin Contracts**: Industry-standard secure smart contracts
+- **Role-Based Access Control**: Granular permissions for different user types
+- **Reentrancy Protection**: Prevents reentrancy attacks
+- **Pausable Operations**: Emergency pause functionality
+- **Input Validation**: Comprehensive parameter validation
+- **Event Logging**: Full transparency and audit trails
+
+## 📊 API Documentation
+
+### Authentication Endpoints
+- `POST /api/auth/register` - User registration
+- `POST /api/auth/login` - User authentication
+- `POST /api/auth/logout` - User logout
+
+### Credit Management
+- `GET /api/credits/user` - Get user's credits
+- `POST /api/credits/request` - Request credit verification
+- `PUT /api/credits/:id/status` - Update credit status
+- `POST /api/credits/retire` - Retire credits
+
+### Marketplace
+- `GET /api/marketplace/listings` - Get active listings
+- `POST /api/marketplace/list` - Create listing
+- `POST /api/marketplace/buy/:id` - Buy credits
+
+### Audit & Analytics
+- `GET /api/audit/transactions` - Get transaction history
+- `GET /api/audit/certificates` - Get certificate details
+- `GET /api/analytics/overview` - System overview
+
+## 🌐 Network Configuration
+
+### Supported Networks
+- **Localhost**: Development and testing
+- **Sepolia**: Ethereum testnet
+- **Polygon Mumbai**: Polygon testnet
+- **Mainnet**: Production deployment
+
+### Network Configuration
+```javascript
+// hardhat.config.js
+networks: {
+  sepolia: {
+    url: `https://sepolia.infura.io/v3/${INFURA_PROJECT_ID}`,
+    accounts: [PRIVATE_KEY]
+  },
+  polygon: {
+    url: `https://polygon-rpc.com`,
+    accounts: [PRIVATE_KEY]
+  }
+}
+```
+
+## 📈 Performance & Scalability
+
+- **Gas Optimization**: Efficient smart contract design
+- **Batch Operations**: Support for multiple operations in single transaction
+- **Lazy Loading**: Frontend optimization for large datasets
+- **Caching**: Backend caching for frequently accessed data
+- **Indexing**: Database indexing for fast queries
 
 ## 🤝 Contributing
 
@@ -266,24 +295,53 @@ npx hardhat run scripts/deploy.js --network mainnet
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
+### Development Guidelines
+- Follow Solidity style guide
+- Write comprehensive tests
+- Update documentation
+- Use conventional commits
+- Follow security best practices
+
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 🆘 Support
 
-- **Documentation**: Check the [Wiki](../../wiki) for detailed guides
-- **Issues**: Report bugs and request features via [GitHub Issues](../../issues)
-- **Discussions**: Join community discussions in [GitHub Discussions](../../discussions)
+- **Documentation**: [Wiki](link-to-wiki)
+- **Issues**: [GitHub Issues](link-to-issues)
+- **Discussions**: [GitHub Discussions](link-to-discussions)
+- **Email**: support@greenh2.com
 
 ## 🙏 Acknowledgments
 
-- **OpenZeppelin** for secure smart contract patterns
-- **TailwindCSS** for the utility-first CSS framework
-- **Recharts** for beautiful data visualization
-- **React Community** for the amazing frontend framework
+- OpenZeppelin for secure smart contract libraries
+- Hardhat for development framework
+- Ethereum Foundation for blockchain infrastructure
+- Green Hydrogen community for feedback and testing
+
+## 🔮 Roadmap
+
+### Phase 1 (Current)
+- ✅ Core smart contracts
+- ✅ Basic marketplace functionality
+- ✅ Verification system
+- ✅ Frontend dashboard
+
+### Phase 2 (Q2 2024)
+- 🔄 Advanced analytics
+- 🔄 Mobile application
+- 🔄 API integrations
+- 🔄 Multi-chain support
+
+### Phase 3 (Q3 2024)
+- 📋 DeFi integrations
+- 📋 Advanced trading features
+- 📋 Regulatory compliance tools
+- 📋 Enterprise features
 
 ---
 
-**Made with ❤️ for a sustainable future powered by green hydrogen**
->>>>>>> aba8189 (Initial commit)
+**Built with ❤️ by the GreenH2 Team**
+
+*Empowering the future of sustainable energy through blockchain technology*

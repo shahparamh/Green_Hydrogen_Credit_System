@@ -398,12 +398,21 @@ const AppRoutes = () => {
       {/* Public Routes */}
       <Route path="/" element={<Landing />} />
       <Route
-        path="/login"
+        path="/auth/login"
         element={user ? <Navigate to={`/dashboard/${user.role}`} replace /> : <Login />}
       />
       <Route
-        path="/register"
+        path="/auth/register"
         element={user ? <Navigate to={`/dashboard/${user.role}`} replace /> : <Register />}
+      />
+      {/* Legacy routes for compatibility */}
+      <Route
+        path="/login"
+        element={<Navigate to="/auth/login" replace />}
+      />
+      <Route
+        path="/register"
+        element={<Navigate to="/auth/register" replace />}
       />
 
       {/* Protected Dashboard */}

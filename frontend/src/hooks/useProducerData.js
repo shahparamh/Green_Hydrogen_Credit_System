@@ -60,37 +60,42 @@ export const useProducerData = () => {
   const calculateAnalytics = (rawData) => {
     const { credits, transactions, marketplaceListings } = rawData;
 
+    // Safety checks: ensure all data is arrays
+    const safeCredits = Array.isArray(credits) ? credits : [];
+    const safeTransactions = Array.isArray(transactions) ? transactions : [];
+    const safeMarketplaceListings = Array.isArray(marketplaceListings) ? marketplaceListings : [];
+
     // Credit analytics
     const creditAnalytics = {
-      totalCredits: credits.length,
-      pendingCredits: credits.filter(c => c.status === 'pending').length,
-      approvedCredits: credits.filter(c => c.status === 'approved').length,
-      rejectedCredits: credits.filter(c => c.status === 'rejected').length,
-      totalValue: credits.reduce((sum, c) => sum + (c.value || 0), 0),
-      monthlyCredits: getMonthlyData(credits, 'createdAt'),
-      statusDistribution: getStatusDistribution(credits)
+      totalCredits: safeCredits.length,
+      pendingCredits: safeCredits.filter(c => c.status === 'pending').length,
+      approvedCredits: safeCredits.filter(c => c.status === 'approved').length,
+      rejectedCredits: safeCredits.filter(c => c.status === 'rejected').length,
+      totalValue: safeCredits.reduce((sum, c) => sum + (c.value || 0), 0),
+      monthlyCredits: getMonthlyData(safeCredits, 'createdAt'),
+      statusDistribution: getStatusDistribution(safeCredits)
     };
 
     // Transaction analytics
     const transactionAnalytics = {
-      totalTransactions: transactions.length,
-      completedTransactions: transactions.filter(t => t.status === 'completed').length,
-      pendingTransactions: transactions.filter(t => t.status === 'pending').length,
-      totalVolume: transactions.reduce((sum, t) => sum + (t.amount || 0), 0),
-      monthlyTransactions: getMonthlyData(transactions, 'createdAt'),
-      transactionTypes: getTransactionTypeDistribution(transactions)
+      totalTransactions: safeTransactions.length,
+      completedTransactions: safeTransactions.filter(t => t.status === 'completed').length,
+      pendingTransactions: safeTransactions.filter(t => t.status === 'pending').length,
+      totalVolume: safeTransactions.reduce((sum, t) => sum + (t.amount || 0), 0),
+      monthlyTransactions: getMonthlyData(safeTransactions, 'createdAt'),
+      transactionTypes: getTransactionTypeDistribution(safeTransactions)
     };
 
     // Marketplace analytics
     const marketplaceAnalytics = {
-      totalListings: marketplaceListings.length,
-      activeListings: marketplaceListings.filter(l => l.status === 'active').length,
-      soldListings: marketplaceListings.filter(l => l.status === 'sold').length,
-      totalRevenue: marketplaceListings
+      totalListings: safeMarketplaceListings.length,
+      activeListings: safeMarketplaceListings.filter(l => l.status === 'active').length,
+      soldListings: safeMarketplaceListings.filter(l => l.status === 'sold').length,
+      totalRevenue: safeMarketplaceListings
         .filter(l => l.status === 'sold')
         .reduce((sum, l) => sum + (l.price || 0), 0),
-      monthlyListings: getMonthlyData(marketplaceListings, 'createdAt'),
-      priceDistribution: getPriceDistribution(marketplaceListings)
+      monthlyListings: getMonthlyData(safeMarketplaceListings, 'createdAt'),
+      priceDistribution: getPriceDistribution(safeMarketplaceListings)
     };
 
     return {
@@ -99,7 +104,7 @@ export const useProducerData = () => {
       marketplace: marketplaceAnalytics,
       overview: {
         totalAssets: creditAnalytics.totalValue + marketplaceAnalytics.totalRevenue,
-        monthlyGrowth: calculateMonthlyGrowth(credits, transactions),
+        monthlyGrowth: calculateMonthlyGrowth(safeCredits, safeTransactions),
         performanceScore: calculatePerformanceScore(creditAnalytics, transactionAnalytics)
       }
     };
@@ -107,6 +112,12 @@ export const useProducerData = () => {
 
   // Helper function to get monthly data
   const getMonthlyData = (items, dateField) => {
+    // Safety check: ensure items is an array
+    if (!Array.isArray(items)) {
+      console.warn('getMonthlyData: items is not an array:', items);
+      return [];
+    }
+    
     const months = {};
     const currentDate = new Date();
     
@@ -131,6 +142,12 @@ export const useProducerData = () => {
 
   // Helper function to get status distribution
   const getStatusDistribution = (items) => {
+    // Safety check: ensure items is an array
+    if (!Array.isArray(items)) {
+      console.warn('getStatusDistribution: items is not an array:', items);
+      return [];
+    }
+    
     const distribution = {};
     items.forEach(item => {
       distribution[item.status] = (distribution[item.status] || 0) + 1;
@@ -140,6 +157,12 @@ export const useProducerData = () => {
 
   // Helper function to get transaction type distribution
   const getTransactionTypeDistribution = (transactions) => {
+    // Safety check: ensure transactions is an array
+    if (!Array.isArray(transactions)) {
+      console.warn('getTransactionTypeDistribution: transactions is not an array:', transactions);
+      return [];
+    }
+    
     const distribution = {};
     transactions.forEach(transaction => {
       distribution[transaction.type] = (distribution[transaction.type] || 0) + 1;
@@ -149,6 +172,12 @@ export const useProducerData = () => {
 
   // Helper function to get price distribution
   const getPriceDistribution = (listings) => {
+    // Safety check: ensure listings is an array
+    if (!Array.isArray(listings)) {
+      console.warn('getPriceDistribution: listings is not an array:', listings);
+      return [];
+    }
+    
     const prices = listings.map(l => l.price).filter(p => p > 0);
     if (prices.length === 0) return [];
 

@@ -57,15 +57,25 @@
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   }));
 
-  // Rate limiting
+  // Rate limiting - More lenient for development
   const limiter = rateLimit({
     windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000, // 15 minutes
-    max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100, // limit each IP to 100 requests per windowMs
+    max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || (process.env.NODE_ENV === 'development' ? 1000 : 100), // More lenient in development
     message: {
       error: 'Too many requests from this IP, please try again later.',
     },
     standardHeaders: true,
     legacyHeaders: false,
+    skip: (req) => {
+      // Skip rate limiting for health checks and auth endpoints in development
+      if (process.env.NODE_ENV === 'development') {
+        return req.path === '/api/health' || 
+               req.path === '/api/debug' || 
+               req.path === '/api/test' ||
+               req.path.startsWith('/api/auth/');
+      }
+      return false;
+    }
   });
 
   app.use('/api/', limiter);
@@ -75,7 +85,11 @@
   app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
   // Cookie parser
-  app.use(cookieParser(process.env.COOKIE_SECRET));
+  const cookieSecret = process.env.COOKIE_SECRET || 'fallback-cookie-secret';
+  if (cookieSecret === 'your-cookie-secret-key-here-change-this-in-production') {
+    console.warn('⚠️  COOKIE_SECRET not properly configured, using fallback');
+  }
+  app.use(cookieParser(cookieSecret));
 
   // Compression middleware
   app.use(compression());
@@ -96,10 +110,31 @@
   // app.use(auditLogger);
 
   app.get('/api', (req, res) => {
-  res.status(200).json({
-    message: 'API is running. Available routes: /auth, /users, /credits, /marketplace, /audit, /transactions'
+    res.status(200).json({
+      message: 'API is running. Available routes: /auth, /users, /credits, /marketplace, /audit, /transactions'
+    });
   });
-});
+
+  // Test endpoint to check if server is working
+  app.get('/api/test', (req, res) => {
+    res.status(200).json({
+      message: 'Test endpoint working',
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV
+    });
+  });
+
+  // Simple test endpoint for debugging
+  app.get('/api/debug', (req, res) => {
+    res.status(200).json({
+      message: 'Debug endpoint working',
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV,
+      database: mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected',
+      jwtSecret: process.env.JWT_SECRET ? 'Set' : 'Not set',
+      cookieSecret: process.env.COOKIE_SECRET ? 'Set' : 'Not set'
+    });
+  });
 
 
   // API Routes

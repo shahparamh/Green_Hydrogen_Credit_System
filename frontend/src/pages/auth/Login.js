@@ -1,9 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, Leaf, Loader2 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
-import { useTheme } from '../../contexts/ThemeContext';
-import ThemeToggle from '../../components/ThemeToggle';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -11,25 +8,17 @@ const Login = () => {
     password: '',
     role: 'producer'
   });
-  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   
-  const { login } = useAuth();
-  const { isDark } = useTheme();
+  const { login, error, clearError } = useAuth();
   const navigate = useNavigate();
-
-  const roles = [
-    { value: 'producer', label: 'Producer', description: 'Produce green hydrogen and request credits' },
-    { value: 'certifier', label: 'Certifier', description: 'Verify and approve credit requests' },
-    { value: 'buyer', label: 'Buyer', description: 'Purchase and retire credits' },
-    { value: 'auditor', label: 'Auditor', description: 'Monitor system transactions' }
-  ];
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
     });
+    if (error) clearError();
   };
 
   const handleSubmit = async (e) => {
@@ -39,42 +28,32 @@ const Login = () => {
     try {
       const result = await login(formData.email, formData.password, formData.role);
       if (result.success) {
-        navigate(`/${formData.role}`);
+        navigate(`/dashboard/${formData.role}`);
       }
-    } catch (error) {
-      console.error('Login error:', error);
+    } catch (err) {
+      console.error('Login error:', err);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50 dark:from-dark-950 dark:to-dark-900 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      {/* Theme Toggle */}
-      <div className="absolute top-4 right-4">
-        <ThemeToggle />
-      </div>
-
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
-        {/* Logo and Title */}
         <div className="text-center">
-          <div className="mx-auto h-16 w-16 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-2xl flex items-center justify-center mb-4">
-            <Leaf className="h-8 w-8 text-white" />
-          </div>
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Welcome to GreenH2
+          <h1 className="text-3xl font-bold text-green-600">🌱 GreenH2</h1>
+          <h2 className="mt-6 text-3xl font-bold text-gray-900">
+            Sign in to your account
           </h2>
-          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-            Sign in to your account to continue
+          <p className="mt-2 text-sm text-gray-600">
+            Access your green hydrogen credit dashboard
           </p>
         </div>
 
-        {/* Login Form */}
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
-            {/* Email */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                 Email address
               </label>
               <input
@@ -85,104 +64,96 @@ const Login = () => {
                 required
                 value={formData.email}
                 onChange={handleChange}
-                className="input-field"
+                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
                 placeholder="Enter your email"
               />
             </div>
 
-            {/* Password */}
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                 Password
               </label>
-              <div className="relative">
-                <input
-                  id="password"
-                  name="password"
-                  type={showPassword ? 'text' : 'password'}
-                  autoComplete="current-password"
-                  required
-                  value={formData.password}
-                  onChange={handleChange}
-                  className="input-field pr-10"
-                  placeholder="Enter your password"
-                />
-                <button
-                  type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-5 w-5 text-gray-400" />
-                  ) : (
-                    <Eye className="h-5 w-5 text-gray-400" />
-                  )}
-                </button>
-              </div>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                autoComplete="current-password"
+                required
+                value={formData.password}
+                onChange={handleChange}
+                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
+                placeholder="Enter your password"
+              />
             </div>
 
-            {/* Role Selection */}
             <div>
-              <label htmlFor="role" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Select your role
+              <label htmlFor="role" className="block text-sm font-medium text-gray-700">
+                Role
               </label>
               <select
                 id="role"
                 name="role"
                 value={formData.role}
                 onChange={handleChange}
-                className="input-field"
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
               >
-                {roles.map((role) => (
-                  <option key={role.value} value={role.value}>
-                    {role.label}
-                  </option>
-                ))}
+                <option value="producer">Producer</option>
+                <option value="certifier">Certifier</option>
+                <option value="buyer">Buyer</option>
+                <option value="auditor">Auditor</option>
+                <option value="regulator">Regulator</option>
               </select>
-              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                {roles.find(r => r.value === formData.role)?.description}
-              </p>
             </div>
           </div>
 
-          {/* Submit Button */}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-          >
-            {loading ? (
-              <>
-                <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4" />
-                Signing in...
-              </>
-            ) : (
-              'Sign in'
-            )}
-          </button>
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">
+              {error}
+            </div>
+          )}
 
-          {/* Links */}
-          <div className="text-center space-y-2">
-            <Link
-              to="/forgot-password"
-              className="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-500 dark:hover:text-primary-300"
+          <div>
+            <button
+              type="submit"
+              disabled={loading}
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Forgot your password?
-            </Link>
-            <div className="text-sm text-gray-600 dark:text-gray-400">
+              {loading ? (
+                <div className="flex items-center">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Signing in...
+                </div>
+              ) : (
+                'Sign in'
+              )}
+            </button>
+          </div>
+
+          <div className="text-center">
+            <p className="text-sm text-gray-600">
               Don't have an account?{' '}
               <Link
-                to="/register"
-                className="text-primary-600 dark:text-primary-400 hover:text-primary-500 dark:hover:text-primary-300 font-medium"
+                to="/auth/register"
+                className="font-medium text-green-600 hover:text-green-500"
               >
-                Sign up
+                Sign up here
               </Link>
-            </div>
+            </p>
           </div>
         </form>
+
+        <div className="text-center">
+          <Link
+            to="/"
+            className="text-sm text-gray-600 hover:text-green-600"
+          >
+            ← Back to home
+          </Link>
+        </div>
       </div>
     </div>
   );
 };
 
 export default Login;
+

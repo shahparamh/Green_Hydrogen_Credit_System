@@ -42,6 +42,11 @@ class CreditService {
     }
   }
 
+  // Get credits by user (alias for getCreditsByUser)
+  async getUserCredits() {
+    return this.getCreditsByUser();
+  }
+
   // Get credit statistics for the current user
   async getCreditStats() {
     try {

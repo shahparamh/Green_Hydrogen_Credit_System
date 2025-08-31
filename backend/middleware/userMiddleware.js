@@ -13,11 +13,40 @@ export const authenticateUser = async (req, res, next) => {
       });
     }
 
+    // Debug logging in development
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔐 Authentication attempt:', {
+        hasCookieToken: !!req.cookies.token,
+        hasAuthHeader: !!req.headers.authorization,
+        tokenLength: token ? token.length : 0,
+        endpoint: req.originalUrl,
+        cookies: Object.keys(req.cookies),
+        headers: Object.keys(req.headers).filter(h => h.toLowerCase().includes('auth'))
+      });
+    }
+
     // Verify JWT token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret');
+    const jwtSecret = process.env.JWT_SECRET || 'fallback-secret';
+    if (!jwtSecret || jwtSecret === 'your-super-secret-jwt-key-here-change-this-in-production') {
+      console.error('JWT_SECRET not properly configured');
+      return res.status(500).json({ 
+        message: 'Server configuration error. Please contact administrator.' 
+      });
+    }
+    
+    const decoded = jwt.verify(token, jwtSecret);
     
     // Check if user still exists
-    const user = await User.findById(decoded.userId).select('-password');
+    let user;
+    try {
+      user = await User.findById(decoded.userId).select('-password');
+    } catch (dbError) {
+      console.error('Database error during authentication:', dbError);
+      return res.status(500).json({ 
+        message: 'Database connection error. Please try again later.' 
+      });
+    }
+    
     if (!user) {
       return res.status(401).json({ 
         message: 'User no longer exists.' 

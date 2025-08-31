@@ -22,6 +22,7 @@ import LineChart from '../../components/Charts/LineChart';
 import BarChart from '../../components/Charts/BarChart';
 import PieChart from '../../components/Charts/PieChart';
 import { useAuditorData } from '../../hooks/useAuditorData';
+import { auditService } from '../../services';
 
 const AuditorDashboard = () => {
   const { data, loading, error, refreshAll, resolveAlert } = useAuditorData();
@@ -68,7 +69,7 @@ const AuditorDashboard = () => {
     try {
       const response = await auditService.investigateFraud(alertId, investigationData);
       if (response.success) {
-        await fetchAllData();
+        await refreshAll();
         return { success: true, data: response.data };
       }
       return { success: false, error: response.message };
@@ -207,7 +208,7 @@ const AuditorDashboard = () => {
   };
 
   useEffect(() => {
-    fetchAllData();
+    refreshAll();
   }, []);
 
   if (loading) {
@@ -228,7 +229,7 @@ const AuditorDashboard = () => {
           <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4"></AlertCircle>
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Error Loading Data</h2>
           <p className="text-gray-600 dark:text-gray-400 mb-4">{error}</p>
-          <button onClick={fetchAllData} className="btn-primary flex items-center mx-auto">
+          <button onClick={refreshAll} className="btn-primary flex items-center mx-auto">
             <RefreshCw className="h-4 h-4 mr-2" />
             Retry
           </button>
@@ -251,7 +252,7 @@ const AuditorDashboard = () => {
           </p>
         </div>
         <div className="flex items-center space-x-3">
-          <button onClick={fetchAllData} className="btn-secondary flex items-center space-x-2">
+          <button onClick={refreshAll} className="btn-secondary flex items-center space-x-2">
             <RefreshCw className="w-4 h-4" />
             <span>Refresh</span>
           </button>

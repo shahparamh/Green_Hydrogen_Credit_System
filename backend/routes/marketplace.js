@@ -9,6 +9,7 @@ import {
   getMarketplaceStats,
   getUserListings
 } from '../controllers/marketplaceController.js';
+import { authenticateUser } from '../middleware/userMiddleware.js';
 
 const router = express.Router();
 
@@ -19,21 +20,21 @@ router.get('/', getAllListings);
 router.get('/stats', getMarketplaceStats);
 
 // Get listings for current authenticated user
-router.get('/user', getUserListings);
+router.get('/user', authenticateUser, getUserListings);
 
 // Create marketplace listing
-router.post('/list', createListing);
+router.post('/list', authenticateUser, createListing);
 
 // Buy credits from marketplace
-router.post('/buy/:listingId', buyCredits);
+router.post('/buy/:listingId', authenticateUser, buyCredits);
 
 // Get marketplace listing by ID
 router.get('/:id', getListingById);
 
 // Update marketplace listing
-router.put('/:id', updateListing);
+router.put('/:id', authenticateUser, updateListing);
 
 // Cancel marketplace listing
-router.delete('/:id', cancelListing);
+router.delete('/:id', authenticateUser, cancelListing);
 
 export default router;

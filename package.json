@@ -1,21 +1,142 @@
 {
-  "name": "project",
-  "version": "1.0.0",
+  "name": "green-hydrogen-credit-system",
+  "version": "2.0.0",
+  "description": "Blockchain-Based Green Hydrogen Credit System - A decentralized platform for minting, trading, and retiring verified green hydrogen credits",
   "main": "index.js",
-  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\" \"npm run dev:blockchain\"",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm start",
+    "dev:blockchain": "npx hardhat node",
+    "start": "npm run start:backend",
+    "start:backend": "cd backend && npm start",
+    "start:frontend": "cd frontend && npm start",
+    "build": "npm run build:frontend",
+    "build:frontend": "cd frontend && npm run build",
+    "test": "npm run test:contracts && npm run test:backend && npm run test:frontend",
+    "test:contracts": "npx hardhat test",
+    "test:backend": "cd backend && npm test",
+    "test:frontend": "cd frontend && npm test",
+    "test:coverage": "npx hardhat coverage",
+    "test:integration": "npm run test:contracts && npm run test:backend",
+    "compile": "npx hardhat compile",
+    "deploy": "npx hardhat run scripts/deploy.js",
+    "deploy:localhost": "npx hardhat run scripts/deploy.js --network localhost",
+    "deploy:sepolia": "npx hardhat run scripts/deploy.js --network sepolia",
+    "deploy:polygon": "npx hardhat run scripts/deploy.js --network polygon",
+    "verify:sepolia": "npx hardhat verify --network sepolia",
+    "verify:polygon": "npx hardhat verify --network polygon",
+    "clean": "npx hardhat clean && rm -rf frontend/build backend/dist",
+    "install:all": "npm install && cd frontend && npm install && cd ../backend && npm install",
+    "lint": "npm run lint:contracts && npm run lint:frontend && npm run lint:backend",
+    "lint:contracts": "npx hardhat lint",
+    "lint:frontend": "cd frontend && npm run lint",
+    "lint:backend": "cd backend && npm run lint",
+    "format": "npm run format:contracts && npm run format:frontend && npm run format:backend",
+    "format:contracts": "npx hardhat format",
+    "format:frontend": "cd frontend && npm run format",
+    "format:backend": "cd backend && npm run format",
+    "docs": "npm run docs:generate && npm run docs:serve",
+    "docs:generate": "jsdoc -c jsdoc.json",
+    "docs:serve": "npx http-server docs/out -p 8080",
+    "setup": "npm run setup:env && npm run setup:db && npm run setup:contracts",
+    "setup:env": "cp backend/env.example backend/.env && cp frontend/env.example frontend/.env",
+    "setup:db": "cd backend && npm run db:setup",
+    "setup:contracts": "npm run compile && npm run deploy:localhost",
+    "reset": "npm run clean && npm run install:all && npm run setup",
+    "docker:build": "docker-compose build",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
+    "check": "npm run check:deps && npm run check:env && npm run check:contracts",
+    "check:deps": "npm audit && npm outdated",
+    "check:env": "node scripts/check-env.js",
+    "check:contracts": "npx hardhat check",
+    "gas": "npx hardhat test --gas-report",
+    "size": "npx hardhat size-contracts",
+    "flatten": "npx hardhat flatten contracts/HydrogenCredits.sol > HydrogenCredits_flattened.sol",
+    "verify:all": "npm run verify:sepolia && npm run verify:polygon",
+    "deploy:all": "npm run deploy:localhost && npm run deploy:sepolia && npm run deploy:polygon"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "keywords": [
+    "blockchain",
+    "ethereum",
+    "solidity",
+    "green-hydrogen",
+    "carbon-credits",
+    "sustainability",
+    "defi",
+    "smart-contracts",
+    "react",
+    "nodejs",
+    "mongodb",
+    "ipfs",
+    "hardhat",
+    "openzeppelin"
+  ],
+  "author": "GreenH2 Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/green-hydrogen-credit-system.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/green-hydrogen-credit-system/issues"
+  },
+  "homepage": "https://github.com/your-username/green-hydrogen-credit-system#readme",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
   "devDependencies": {
-    "@nomicfoundation/hardhat-toolbox": "^6.1.0",
-    "hardhat": "^2.22.6"
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "@openzeppelin/contracts": "^5.0.0",
+    "@openzeppelin/hardhat-upgrades": "^1.28.0",
+    "concurrently": "^8.2.2",
+    "dotenv": "^16.3.1",
+    "hardhat": "^2.19.0",
+    "hardhat-contract-sizer": "^2.8.0",
+    "hardhat-gas-reporter": "^1.0.9",
+    "jsdoc": "^4.0.2",
+    "prettier": "^3.1.0",
+    "solhint": "^4.0.0",
+    "solidity-coverage": "^0.8.5"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^5.4.0",
-    "ethers": "^6.15.0"
+    "ethers": "^6.8.1"
+  },
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "config": {
+    "commitizen": {
+      "path": "cz-conventional-changelog"
+    }
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run lint && npm run test:contracts",
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
+    }
+  },
+  "commitlint": {
+    "extends": [
+      "@commitlint/config-conventional"
+    ]
+  },
+  "prettier": {
+    "semi": true,
+    "trailingComma": "es5",
+    "singleQuote": true,
+    "printWidth": 80,
+    "tabWidth": 2
+  },
+  "solhint": {
+    "extends": "solhint:recommended",
+    "rules": {
+      "compiler-version": "off",
+      "func-visibility": "off"
+    }
   }
 }

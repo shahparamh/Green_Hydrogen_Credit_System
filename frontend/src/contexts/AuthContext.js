@@ -1,141 +1,126 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../services/api.js';
 
 const AuthContext = createContext();
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-};
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [authChecked, setAuthChecked] = useState(false);
+  const [authCheckInProgress, setAuthCheckInProgress] = useState(false);
 
-  // Configure axios defaults
-  const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:4000/api';
-  console.log('API URL:', apiUrl);
-  axios.defaults.baseURL = apiUrl;
-  axios.defaults.withCredentials = true;
-  
-  // Add request interceptor for debugging
-  axios.interceptors.request.use(
-    (config) => {
-      console.log('API Request:', config.method?.toUpperCase(), config.url, config.data);
-      return config;
-    },
-    (error) => {
-      console.error('Request error:', error);
-      return Promise.reject(error);
-    }
-  );
-  
-  // Add response interceptor for debugging
-  axios.interceptors.response.use(
-    (response) => {
-      console.log('API Response:', response.status, response.data);
-      return response;
-    },
-    (error) => {
-      console.error('Response error:', error.response?.status, error.response?.data);
-      return Promise.reject(error);
-    }
-  );
-
-  // Check if user is authenticated on mount
+  // Check if user is authenticated on mount (only once)
   useEffect(() => {
-    checkAuth();
-  }, []);
+    if (!authChecked) {
+      checkAuth();
+    }
+  }, [authChecked]);
 
   const checkAuth = async () => {
+    // Prevent multiple simultaneous auth checks
+    if (authCheckInProgress) {
+      return;
+    }
+    
     try {
-      const response = await axios.get('/auth/me');
+      setAuthCheckInProgress(true);
+      setLoading(true);
+      const response = await api.get('/auth/me');
       setUser(response.data.user);
+      setError(null);
     } catch (err) {
+      console.log('Not authenticated:', err.message);
       setUser(null);
+      setError(null); // Don't show error for unauthenticated users
+      
+      // Clear any stale tokens
+      if (err.response?.status === 401) {
+        // Clear any stored user data
+        localStorage.removeItem('user');
+      }
+      
+      // Handle rate limiting - retry after a delay
+      if (err.response?.status === 429) {
+        console.log('Rate limited, retrying after delay...');
+        setTimeout(() => {
+          checkAuth();
+        }, 2000); // Retry after 2 seconds
+        return;
+      }
     } finally {
       setLoading(false);
+      setAuthChecked(true); // Mark as checked to prevent re-checking
+      setAuthCheckInProgress(false);
     }
   };
 
   const login = async (email, password, role) => {
     try {
       setError(null);
-      const response = await axios.post('/auth/login', { email, password, role });
+      setLoading(true);
+      
+      const response = await api.post('/auth/login', { email, password, role });
       setUser(response.data.user);
+      setError(null);
       return { success: true };
     } catch (err) {
-      const errorMessage = err.response?.data?.message || 'Login failed';
+      const errorMessage = err.response?.data?.message || err.message || 'Login failed';
       setError(errorMessage);
+      setUser(null);
       return { success: false, error: errorMessage };
+    } finally {
+      setLoading(false);
     }
   };
 
   const register = async (userData) => {
     try {
       setError(null);
-      const response = await axios.post('/auth/register', userData);  
+      setLoading(true);
+      
+      const response = await api.post('/auth/register', userData);
       setUser(response.data.user);
+      setError(null);
       return { success: true };
     } catch (err) {
-      console.error('Registration error details:', err.response?.data);
-      
-      let errorMessage = 'Registration failed';
-      
-      if (err.response?.data?.errors && Array.isArray(err.response.data.errors)) {
-        errorMessage = err.response.data.errors.join(', ');
-      } else if (err.response?.data?.message) {
-        errorMessage = err.response.data.message;
-      } else if (err.response?.status === 400) {
-        errorMessage = 'Invalid registration data. Please check your input.';
-      } else if (err.response?.status === 409) {
-        errorMessage = 'User already exists with this email.';
-      } else if (err.response?.status === 422) {
-        errorMessage = 'Validation error. Please check your input.';
-      } else if (err.response?.status >= 500) {
-        errorMessage = 'Server error. Please try again later.';
-      }
-      
+      const errorMessage = err.response?.data?.message || err.message || 'Registration failed';
       setError(errorMessage);
+      setUser(null);
       return { success: false, error: errorMessage };
+    } finally {
+      setLoading(false);
     }
   };
 
   const logout = async () => {
     try {
-      await axios.post('/auth/logout');
+      await api.post('/auth/logout');
+    } catch (err) {
+      console.log('Logout error:', err.message);
+    } finally {
       setUser(null);
       setError(null);
-    } catch (err) {
-      console.error('Logout error:', err);
+      setLoading(false);
     }
   };
 
   const updateProfile = async (profileData) => {
     try {
       setError(null);
-      const response = await axios.put('/auth/profile', profileData);
+      const response = await api.put('/auth/profile', profileData);
       setUser(response.data.user);
+      setError(null);
       return { success: true };
     } catch (err) {
-      const errorMessage = err.response?.data?.message || 'Profile update failed';
+      const errorMessage = err.response?.data?.message || err.message || 'Profile update failed';
       setError(errorMessage);
       return { success: false, error: errorMessage };
     }
   };
 
-  const hasRole = (requiredRole) => {
-    if (!user) return false;
-    return user.role === requiredRole || user.role === 'admin';
-  };
-
-  const hasAnyRole = (roles) => {
-    if (!user) return false;
-    return roles.includes(user.role) || user.role === 'admin';
+  const clearError = () => {
+    setError(null);
   };
 
   const value = {
@@ -146,9 +131,13 @@ export const AuthProvider = ({ children }) => {
     register,
     logout,
     updateProfile,
-    hasRole,
-    hasAnyRole,
-    isAuthenticated: !!user
+    clearError,
+    checkAuth,
+    refreshAuth: () => {
+      setAuthChecked(false);
+      setAuthCheckInProgress(false);
+      checkAuth();
+    }
   };
 
   return (
@@ -156,4 +145,12 @@ export const AuthProvider = ({ children }) => {
       {children}
     </AuthContext.Provider>
   );
+};
+
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
 };

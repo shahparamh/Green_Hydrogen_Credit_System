@@ -64,7 +64,7 @@ const Header = ({ onSidebarToggle, sidebarOpen }) => {
             <div className="flex items-center space-x-3">
               <div className="text-right hidden sm:block">
                 <p className="text-sm font-medium text-gray-900 dark:text-white">
-                  {user?.name || 'User'}
+                  {user?.firstName ? `${user.firstName} ${user.lastName}` : 'User'}
                 </p>
                 <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">
                   {user?.role || 'Role'}
@@ -72,7 +72,7 @@ const Header = ({ onSidebarToggle, sidebarOpen }) => {
               </div>
               <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-full flex items-center justify-center">
                 <span className="text-white font-semibold text-sm">
-                  {user?.name?.charAt(0) || user?.email?.charAt(0) || 'U'}
+                  {user?.firstName?.charAt(0) || user?.email?.charAt(0) || 'U'}
                 </span>
               </div>
             </div>

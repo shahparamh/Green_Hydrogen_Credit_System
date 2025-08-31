@@ -9,32 +9,33 @@ import {
   retireCredits,
   getTransactionsByCurrentUser
 } from '../controllers/transactionController.js';
+import { authenticateUser } from '../middleware/userMiddleware.js';
 
 const router = express.Router();
 
 // Get all transactions
-router.get('/', getAllTransactions);
+router.get('/', authenticateUser, getAllTransactions);
 
 // Get transaction statistics
-router.get('/stats', getTransactionStats);
+router.get('/stats', authenticateUser, getTransactionStats);
 
 // Get transactions for current authenticated user
-router.get('/current-user', getTransactionsByCurrentUser);
+router.get('/current-user', authenticateUser, getTransactionsByCurrentUser);
 
 // Get transactions by user ID
-router.get('/user/:userId', getTransactionsByUser);
+router.get('/user/:userId', authenticateUser, getTransactionsByUser);
 
 // Get transaction by ID
-router.get('/:id', getTransactionById);
+router.get('/:id', authenticateUser, getTransactionById);
 
 // Update transaction status (admin only)
-router.put('/:id/status', updateTransactionStatus);
+router.put('/:id/status', authenticateUser, updateTransactionStatus);
 
 // Retire credits
-router.post('/:id/retire', retireCredits);
+router.post('/:id/retire', authenticateUser, retireCredits);
 
 // Create manual transaction (admin only)
-router.post('/', createTransaction);
+router.post('/', authenticateUser, createTransaction);
 
 export default router;
 

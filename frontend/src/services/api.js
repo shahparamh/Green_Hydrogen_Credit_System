@@ -70,11 +70,16 @@ api.interceptors.response.use(
       
       switch (status) {
         case 401:
-          // Unauthorized - redirect to login
-          toast.error('Session expired. Please login again.');
-          // Clear user data and redirect to login
-          localStorage.removeItem('user');
-          window.location.href = '/login';
+          // Unauthorized - only redirect if not on auth pages
+          const currentPath = window.location.pathname;
+          const isAuthPage = currentPath.includes('/auth/') || currentPath === '/login' || currentPath === '/register';
+          
+          if (!isAuthPage) {
+            toast.error('Session expired. Please login again.');
+            // Clear user data and redirect to login
+            localStorage.removeItem('user');
+            window.location.href = '/auth/login';
+          }
           break;
           
         case 403:
@@ -98,7 +103,10 @@ api.interceptors.response.use(
           break;
           
         case 429:
-          // Rate limited
+          // Rate limited - more lenient in development
+          if (process.env.NODE_ENV === 'development') {
+            console.warn('Rate limited in development - this should not happen with current settings');
+          }
           toast.error('Too many requests. Please try again later.');
           break;
           

@@ -78,8 +78,13 @@ export const createAuditLog = async (options) => {
       }
     });
 
-    // Save the audit log
-    await auditLog.save();
+    // Save the audit log only if database is connected
+    try {
+      await auditLog.save();
+    } catch (dbError) {
+      // If database save fails, just log to console
+      console.warn('Failed to save audit log to database:', dbError.message);
+    }
 
     // Log to console in development
     if (process.env.NODE_ENV === 'development') {

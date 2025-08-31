@@ -1,285 +1,231 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, Leaf, Loader2, User, Mail, Lock } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
-import { useTheme } from '../../contexts/ThemeContext';
-import ThemeToggle from '../../components/ThemeToggle';
 
 const Register = () => {
   const [formData, setFormData] = useState({
-    name: '',
+    firstName: '',
+    lastName: '',
     email: '',
     password: '',
     confirmPassword: '',
-    role: 'producer'
+    role: 'producer',
+    organization: ''
   });
-
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState({});
   
-  const { register } = useAuth();
-  const { isDark } = useTheme();
+  const { register, error, clearError } = useAuth();
   const navigate = useNavigate();
 
-  const roles = [
-    { value: 'producer', label: 'Producer', description: 'Produce green hydrogen and request credits', icon: '🌱' },
-    { value: 'certifier', label: 'Certifier', description: 'Verify and approve credit requests', icon: '✅' },
-    { value: 'buyer', label: 'Buyer', description: 'Purchase and retire credits', icon: '💰' },
-    { value: 'auditor', label: 'Auditor', description: 'Monitor system transactions', icon: '🔍' }
-  ];
-
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-
-    // Clear error when user starts typing
-    if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
-    }
-  };
-
-  const validateForm = () => {
-    const newErrors = {};
-
-    // Basic validation
-    if (!formData.name.trim()) newErrors.name = 'Name is required';
-    if (!formData.email.trim()) newErrors.email = 'Email is required';
-    else if (!/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email';
-    }
-    
-    if (!formData.password) newErrors.password = 'Password is required';
-    else if (formData.password.length < 8) newErrors.password = 'Password must be at least 8 characters';
-    
-    if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+    if (error) clearError();
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!validateForm()) {
+    if (formData.password !== formData.confirmPassword) {
+      alert('Passwords do not match');
       return;
     }
-
+    
     setLoading(true);
     
     try {
-      // Remove confirmPassword from data sent to API
-      const { confirmPassword, ...registrationData } = formData;
-      
-      console.log('Sending registration data:', registrationData);
-      
-      const result = await register(registrationData);
+      const result = await register(formData);
       if (result.success) {
-        navigate(`/${formData.role}`);
-      } else {
-        setErrors({ submit: result.error || 'Registration failed' });
+        navigate(`/dashboard/${formData.role}`);
       }
-    } catch (error) {
-      console.error('Registration error:', error);
-      setErrors({ submit: error.message || 'Registration failed' });
+    } catch (err) {
+      console.error('Registration error:', err);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50 dark:from-dark-950 dark:to-dark-900 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      {/* Theme Toggle */}
-      <div className="absolute top-4 right-4">
-        <ThemeToggle />
-      </div>
-
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
-        {/* Logo and Title */}
         <div className="text-center">
-          <div className="mx-auto h-16 w-16 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-2xl flex items-center justify-center mb-4">
-            <Leaf className="h-8 w-8 text-white" />
-          </div>
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Join GreenH2
+          <h1 className="text-3xl font-bold text-green-600">🌱 GreenH2</h1>
+          <h2 className="mt-6 text-3xl font-bold text-gray-900">
+            Create your account
           </h2>
-          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-            Create your account to start your green hydrogen journey
+          <p className="mt-2 text-sm text-gray-600">
+            Join the green hydrogen revolution
           </p>
         </div>
 
-        {/* Registration Form */}
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {/* Name */}
-          <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Full Name *
-            </label>
-            <input
-              id="name"
-              name="name"
-              type="text"
-              required
-              value={formData.name}
-              onChange={handleChange}
-              className={`input-field ${errors.name ? 'border-red-500' : ''}`}
-              placeholder="Enter your full name"
-            />
-            {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
-          </div>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">
+                  First Name
+                </label>
+                <input
+                  id="firstName"
+                  name="firstName"
+                  type="text"
+                  required
+                  value={formData.firstName}
+                  onChange={handleChange}
+                  className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
+                  placeholder="First name"
+                />
+              </div>
 
-          {/* Email */}
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Email Address *
-            </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              autoComplete="email"
-              required
-              value={formData.email}
-              onChange={handleChange}
-              className={`input-field ${errors.email ? 'border-red-500' : ''}`}
-              placeholder="Enter your email"
-            />
-            {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
-          </div>
+              <div>
+                <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">
+                  Last Name
+                </label>
+                <input
+                  id="lastName"
+                  name="lastName"
+                  type="text"
+                  required
+                  value={formData.lastName}
+                  onChange={handleChange}
+                  className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
+                  placeholder="Last name"
+                />
+              </div>
+            </div>
 
-          {/* Role Selection */}
-          <div>
-            <label htmlFor="role" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Select your role *
-            </label>
-            <select
-              id="role"
-              name="role"
-              value={formData.role}
-              onChange={handleChange}
-              className="input-field"
-            >
-              {roles.map((role) => (
-                <option key={role.value} value={role.value}>
-                  {role.icon} {role.label}
-                </option>
-              ))}
-            </select>
-            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-              {roles.find(r => r.value === formData.role)?.description}
-            </p>
-          </div>
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                Email address
+              </label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                required
+                value={formData.email}
+                onChange={handleChange}
+                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
+                placeholder="Enter your email"
+              />
+            </div>
 
-          {/* Password */}
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Password *
-            </label>
-            <div className="relative">
+            <div>
+              <label htmlFor="organization" className="block text-sm font-medium text-gray-700">
+                Organization
+              </label>
+              <input
+                id="organization"
+                name="organization"
+                type="text"
+                value={formData.organization}
+                onChange={handleChange}
+                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
+                placeholder="Company or organization"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="role" className="block text-sm font-medium text-gray-700">
+                Role
+              </label>
+              <select
+                id="role"
+                name="role"
+                value={formData.role}
+                onChange={handleChange}
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
+              >
+                <option value="producer">Producer</option>
+                <option value="certifier">Certifier</option>
+                <option value="buyer">Buyer</option>
+                <option value="auditor">Auditor</option>
+                <option value="regulator">Regulator</option>
+              </select>
+            </div>
+
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                Password
+              </label>
               <input
                 id="password"
                 name="password"
-                type={showPassword ? 'text' : 'password'}
+                type="password"
                 autoComplete="new-password"
                 required
                 value={formData.password}
                 onChange={handleChange}
-                className={`input-field pr-10 ${errors.password ? 'border-red-500' : ''}`}
-                placeholder="Create a strong password"
+                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
+                placeholder="Create a password"
               />
-              <button
-                type="button"
-                className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? (
-                  <EyeOff className="h-5 w-5 text-gray-400" />
-                ) : (
-                  <Eye className="h-5 w-5 text-gray-400" />
-                )}
-              </button>
             </div>
-            {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
-            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-              Must be at least 8 characters long
-            </p>
-          </div>
 
-          {/* Confirm Password */}
-          <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Confirm Password *
-            </label>
-            <div className="relative">
+            <div>
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+                Confirm Password
+              </label>
               <input
                 id="confirmPassword"
                 name="confirmPassword"
-                type={showConfirmPassword ? 'text' : 'password'}
+                type="password"
                 autoComplete="new-password"
                 required
                 value={formData.confirmPassword}
                 onChange={handleChange}
-                className={`input-field pr-10 ${errors.confirmPassword ? 'border-red-500' : ''}`}
+                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
                 placeholder="Confirm your password"
               />
-              <button
-                type="button"
-                className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              >
-                {showConfirmPassword ? (
-                  <EyeOff className="h-5 w-5 text-gray-400" />
-                ) : (
-                  <Eye className="h-5 w-5 text-gray-400" />
-                )}
-              </button>
             </div>
-            {errors.confirmPassword && <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>}
           </div>
 
-          {/* Submit Button */}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-          >
-            {loading ? (
-              <>
-                <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4" />
-                Creating Account...
-              </>
-            ) : (
-              'Create Account'
-            )}
-          </button>
-
-          {/* Error Display */}
-          {errors.submit && (
-            <div className="text-red-500 text-center text-sm">
-              {errors.submit}
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">
+              {error}
             </div>
           )}
 
-          {/* Links */}
-          <div className="text-center space-y-2">
-            <div className="text-sm text-gray-600 dark:text-gray-400">
+          <div>
+            <button
+              type="submit"
+              disabled={loading}
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? (
+                <div className="flex items-center">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Creating account...
+                </div>
+              ) : (
+                'Create Account'
+              )}
+            </button>
+          </div>
+
+          <div className="text-center">
+            <p className="text-sm text-gray-600">
               Already have an account?{' '}
               <Link
-                to="/login"
-                className="text-primary-600 dark:text-primary-400 hover:text-primary-500 dark:hover:text-primary-300 font-medium"
+                to="/auth/login"
+                className="font-medium text-green-600 hover:text-green-500"
               >
-                Sign in
+                Sign in here
               </Link>
-            </div>
+            </p>
           </div>
         </form>
+
+        <div className="text-center">
+          <Link
+            to="/"
+            className="text-sm text-gray-600 hover:text-green-600"
+          >
+            ← Back to home
+          </Link>
+        </div>
       </div>
     </div>
   );
