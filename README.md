@@ -342,6 +342,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**Built with ❤️ by the GreenH2 Team**
+**Built with ❤️ by the Cache Me If You Can Team**
 
 *Empowering the future of sustainable energy through blockchain technology*
